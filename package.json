@@ -1,0 +1,28 @@
+{
+  "name": "schema-compatibility-modes",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "service:up": "docker-compose up -d",
+    "service:down": "docker-compose down",
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^29.0.2",
+    "@types/node": "^18.7.13",
+    "ajv": "^8.11.0",
+    "json-schema": "^0.4.0",
+    "reflect-metadata": "^0.1.13",
+    "ts-jest": "^28.0.8",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "@kafkajs/confluent-schema-registry": "^3.2.1",
+    "axios": "^0.27.2"
+  }
+}
