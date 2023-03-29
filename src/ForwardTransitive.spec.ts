@@ -2,8 +2,9 @@ import axios from 'axios';
 import timers from 'timers/promises'
 import { COMPATIBILITY, SchemaType } from "@kafkajs/confluent-schema-registry";
 import { SchemaRegistry } from '@kafkajs/confluent-schema-registry';
+import { JSONSchema7 } from 'json-schema';
 
-const initialSchema = {
+const initialSchema: JSONSchema7 = {
   "$schema": "http://json-schema.org/draft-07/schema",
   "$id": "BookingV1Value",
   "definitions": {},
@@ -11,7 +12,7 @@ const initialSchema = {
   "$comment": "This was uploaded automatically, do not edit this schema manually."
 }
 
-const BookingV1ValueBase = {
+const BookingV1ValueBase: JSONSchema7 = {
   "additionalProperties": true,
   "properties": {
     "bookingId": {
@@ -52,7 +53,7 @@ const BookingV1ValueBase = {
   "type": "object"
 }
 
-const BookingV1Value_BaseWithNewRequired = {
+const BookingV1Value_BaseWithNewRequired: JSONSchema7 = {
   "additionalProperties": true,
   "properties": {
     "bookingId": {
@@ -98,7 +99,7 @@ const BookingV1Value_BaseWithNewRequired = {
   "type": "object"
 }
 
-const BookingV1Value_BaseWithNewOptional = {
+const BookingV1Value_BaseWithNewOptional: JSONSchema7 = {
   "additionalProperties": true,
   "properties": {
     "bookingId": {
@@ -151,7 +152,7 @@ const BookingV1Value_BaseWithNewOptional = {
   "type": "object"
 }
 
-const BookingV1Value_BaseWithDeleteOptional = {
+const BookingV1Value_BaseWithDeleteOptional: JSONSchema7 = {
   "additionalProperties": true,
   "properties": {
     "bookingId": {
@@ -180,7 +181,7 @@ const BookingV1Value_BaseWithDeleteOptional = {
   "type": "object"
 }
 
-const BookingV1Value_BaseWithDeleteRequired = {
+const BookingV1Value_BaseWithDeleteRequired: JSONSchema7 = {
   "additionalProperties": true,
   "properties": {
     "bookingId": {
@@ -217,7 +218,7 @@ const BookingV1Value_BaseWithDeleteRequired = {
   "type": "object"
 }
 
-const BookingV1Value_BaseWithNewEnumValue = {
+const BookingV1Value_BaseWithNewEnumValue: JSONSchema7 = {
   "additionalProperties": true,
   "properties": {
     "bookingId": {
@@ -259,7 +260,7 @@ const BookingV1Value_BaseWithNewEnumValue = {
   "type": "object"
 }
 
-const BookingV1Value_BaseWithDeleteEnumValue = {
+const BookingV1Value_BaseWithDeleteEnumValue: JSONSchema7 = {
   "additionalProperties": true,
   "properties": {
     "bookingId": {

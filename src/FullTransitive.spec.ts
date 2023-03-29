@@ -30,7 +30,7 @@ const BookingV1ValueBase: JSONSchema7 = {
         "FR"
       ],
       "title": "segment",
-      "type": "string"
+      "type": "string",
     },
     "phone": {
       "title": "phone",
@@ -93,6 +93,7 @@ const BookingV1Value_BaseWithNewRequired: JSONSchema7 = {
   "required": [
     "bookingId",
     "vehicleId",
+    "segment",
     "customerId"
   ],
   "type": "object"
@@ -146,6 +147,7 @@ const BookingV1Value_BaseWithNewOptional: JSONSchema7 = {
   "required": [
     "bookingId",
     "vehicleId",
+    "segment",
   ],
   "type": "object"
 }
@@ -174,6 +176,7 @@ const BookingV1Value_BaseWithDeleteOptional: JSONSchema7 = {
   "required": [
     "bookingId",
     "vehicleId",
+    "segment",
   ],
   "type": "object"
 }
@@ -210,6 +213,7 @@ const BookingV1Value_BaseWithDeleteRequired: JSONSchema7 = {
   "required": [
     "bookingId",
     "vehicleId",
+    "segment",
   ],
   "type": "object"
 }
@@ -233,7 +237,7 @@ const BookingV1Value_BaseWithNewEnumValue: JSONSchema7 = {
         "GR",
       ],
       "title": "segment",
-      "type": "string"
+      "type": "string",
     },
     "phone": {
       "title": "phone",
@@ -251,6 +255,7 @@ const BookingV1Value_BaseWithNewEnumValue: JSONSchema7 = {
   "required": [
     "bookingId",
     "vehicleId",
+    "segment",
   ],
   "type": "object"
 }
@@ -290,6 +295,7 @@ const BookingV1Value_BaseWithDeleteEnumValue: JSONSchema7 = {
   "required": [
     "bookingId",
     "vehicleId",
+    "segment",
   ],
   "type": "object"
 }
@@ -309,33 +315,19 @@ const registry = new SchemaRegistry({ host: 'http://0.0.0.0:8081' }, {
 });
 
 const userOps = {
-  subject: 'com.tim.test.backward.transitive',
-  compatibility: COMPATIBILITY.BACKWARD_TRANSITIVE,
+  subject: 'com.tim.test.full.transitive',
+  compatibility: COMPATIBILITY.FULL_TRANSITIVE,
 }
 
-describe('BackwardTransitive Compatible Schemas Evolution', () => {
+describe('FullTransitive Compatible Schemas Evolution', () => {
 
   beforeEach(async () => {
     try {
-      await axios.delete("http://localhost:8081/subjects/com.tim.test.backward.transitive");
-      await axios.delete("http://localhost:8081/subjects/com.tim.test.backward.transitive?permanent=true");
+      await axios.delete("http://localhost:8081/subjects/com.tim.test.full.transitive");
+      await axios.delete("http://localhost:8081/subjects/com.tim.test.full.transitive?permanent=true");
       await timers.setTimeout(2000);
     } catch { }
   })
-
-  it('will ALLOW new optional fields in CLOSED schema mode', async () => {
-    await registry.register(
-      makeSchema({ BookingV1Value: { ...BookingV1ValueBase, additionalProperties: false } }),
-      userOps
-    );
-
-    const { id } = await registry.register(
-      makeSchema({ BookingV1Value: { ...BookingV1Value_BaseWithNewOptional, additionalProperties: false } }),
-      userOps
-    )
-
-    await expect(id).toBeTruthy();
-  });
 
   it('will DENY new optional fields in OPEN schema mode', async () => {
     await registry.register(
@@ -345,11 +337,26 @@ describe('BackwardTransitive Compatible Schemas Evolution', () => {
 
     const throwable = async () =>
       registry.register(
-        makeSchema({ BookingV1Value: BookingV1Value_BaseWithNewOptional }),
+        makeSchema({ BookingV1Value: { ...BookingV1Value_BaseWithNewOptional } }),
         userOps
       );
 
     await expect(throwable).rejects.toThrowError('Difference{jsonPath=\'#/properties/customerId\', type=PROPERTY_ADDED_TO_OPEN_CONTENT_MODEL}]');
+  });
+
+  it('will DENY new optional fields in CLOSED schema mode', async () => {
+    await registry.register(
+      makeSchema({ BookingV1Value: { ...BookingV1ValueBase, additionalProperties: false } }),
+      userOps
+    );
+
+    const throwable = async () =>
+      registry.register(
+        makeSchema({ BookingV1Value: { ...BookingV1Value_BaseWithNewOptional, additionalProperties: false } }),
+        userOps
+      );
+
+    await expect(throwable).rejects.toThrowError('Difference{jsonPath=\'#/properties/customerId\', type=PROPERTY_REMOVED_FROM_CLOSED_CONTENT_MODEL}]');
   });
 
   it('will DENY new required fields in OPEN schema mode', async () => {
@@ -360,7 +367,7 @@ describe('BackwardTransitive Compatible Schemas Evolution', () => {
 
     const throwable = async () =>
       registry.register(
-        makeSchema({ BookingV1Value: BookingV1Value_BaseWithNewRequired }),
+        makeSchema({ BookingV1Value: { ...BookingV1Value_BaseWithNewRequired } }),
         userOps
       );
 
@@ -388,15 +395,16 @@ describe('BackwardTransitive Compatible Schemas Evolution', () => {
       userOps
     );
 
-    const { id } = await registry.register(
-      makeSchema({ BookingV1Value: BookingV1Value_BaseWithDeleteRequired }),
-      userOps
-    )
+    const throwable = async () =>
+      registry.register(
+        makeSchema({ BookingV1Value: BookingV1Value_BaseWithDeleteRequired }),
+        userOps
+      );
 
-    await expect(id).toBeTruthy();
-  });
+    await expect(throwable).rejects.toThrowError('Difference{jsonPath=\'#/properties/vehicleId\', type=PROPERTY_ADDED_TO_OPEN_CONTENT_MODEL}]');
+  })
 
-  it('will ALLOW deletion of required field in CLOSED schema mode', async () => {
+  it('will DENY deletion of required field in CLOSED schema mode', async () => {
     await registry.register(
       makeSchema({ BookingV1Value: { ...BookingV1ValueBase, additionalProperties: false } }),
       userOps
@@ -411,18 +419,19 @@ describe('BackwardTransitive Compatible Schemas Evolution', () => {
     await expect(throwable).rejects.toThrowError('Difference{jsonPath=\'#/properties/vehicleId\', type=PROPERTY_REMOVED_FROM_CLOSED_CONTENT_MODEL}]');
   });
 
-  it('will ALLOW deletion of optional field in OPEN schema mode', async () => {
+  it('will DENY deletion of optional field in OPEN schema mode', async () => {
     await registry.register(
       makeSchema({ BookingV1Value: BookingV1ValueBase }),
       userOps
     );
 
-    const { id } = await registry.register(
-      makeSchema({ BookingV1Value: BookingV1Value_BaseWithDeleteOptional }),
-      userOps
-    )
+    const throwable = async () =>
+      registry.register(
+        makeSchema({ BookingV1Value: BookingV1Value_BaseWithDeleteOptional }),
+        userOps
+      );
 
-    await expect(id).toBeTruthy();
+    await expect(throwable).rejects.toThrowError('Difference{jsonPath=\'#/properties/phone\', type=PROPERTY_ADDED_TO_OPEN_CONTENT_MODEL}]');
   });
 
   it('will DENY deletion of optional field in CLOSED schema mode', async () => {
@@ -440,32 +449,34 @@ describe('BackwardTransitive Compatible Schemas Evolution', () => {
     await expect(throwable).rejects.toThrowError('Difference{jsonPath=\'#/properties/phone\', type=PROPERTY_REMOVED_FROM_CLOSED_CONTENT_MODEL}]');
   });
 
-  it('will ALLOW adding value to ENUM field in OPEN schema mode', async () => {
+  it('will DENY adding value to ENUM field in OPEN schema mode', async () => {
     await registry.register(
       makeSchema({ BookingV1Value: BookingV1ValueBase }),
       userOps
     );
 
-    const { id } = await registry.register(
-      makeSchema({ BookingV1Value: BookingV1Value_BaseWithNewEnumValue }),
-      userOps
-    )
+    const throwable = async () =>
+      registry.register(
+        makeSchema({ BookingV1Value: BookingV1Value_BaseWithNewEnumValue }),
+        userOps
+      );
 
-    await expect(id).toBeTruthy();
+    await expect(throwable).rejects.toThrowError('Difference{jsonPath=\'#/properties/segment\', type=COMBINED_TYPE_SUBSCHEMAS_CHANGED}]');
   });
 
-  it('will ALLOW adding value to ENUM field in CLOSED schema mode', async () => {
+  it('will DENY adding value to ENUM field in CLOSED schema mode', async () => {
     await registry.register(
       makeSchema({ BookingV1Value: { ...BookingV1ValueBase, additionalProperties: false } }),
       userOps
     );
 
-    const { id } = await registry.register(
-      makeSchema({ BookingV1Value: { ...BookingV1Value_BaseWithNewEnumValue, additionalProperties: false } }),
-      userOps
-    )
+    const throwable = async () =>
+      registry.register(
+        makeSchema({ BookingV1Value: { ...BookingV1Value_BaseWithNewEnumValue, additionalProperties: false } }),
+        userOps
+      );
 
-    await expect(id).toBeTruthy();
+    await expect(throwable).rejects.toThrowError('Difference{jsonPath=\'#/properties/segment\', type=COMBINED_TYPE_SUBSCHEMAS_CHANGED}]');
   });
 
   it('will DENY removing value from ENUM field in OPEN schema mode', async () => {
