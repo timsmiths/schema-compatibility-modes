@@ -5,6 +5,7 @@ import {
   BookingV1Value_BaseWithDeleteEnumValue,
   BookingV1Value_BaseWithDeleteOptional,
   BookingV1Value_BaseWithDeleteRequired,
+  BookingV1Value_BaseWithModifiedMaxLength,
   BookingV1Value_BaseWithModifiedType,
   BookingV1Value_BaseWithNewEnumValue,
   BookingV1Value_BaseWithNewOptional,
@@ -225,5 +226,32 @@ describe('ForwardTransitive Compatible Schemas Evolution', () => {
       );
 
     await expect(throwable).rejects.toThrowError('Difference{jsonPath=\'#/properties/bookingId\', type=TYPE_CHANGED}]');
+  });
+
+  it('will ALLOW changing validation in OPEN schema mode', async () => {
+    await registry.register(
+      makeSchema({ BookingV1Value: { ...BookingV1ValueBase } }),
+      userOps
+    );
+    const { id } = await registry.register(
+      makeSchema({ BookingV1Value: BookingV1Value_BaseWithModifiedMaxLength }),
+      userOps
+    );
+
+    await expect(id).toBeTruthy();
+  });
+
+  it('will ALLOW changing validation in CLOSED schema mode', async () => {
+    await registry.register(
+      makeSchema({ BookingV1Value: { ...BookingV1ValueBase, additionalProperties: false } }),
+      userOps
+    );
+
+    const { id } = await registry.register(
+      makeSchema({ BookingV1Value: { ...BookingV1Value_BaseWithModifiedMaxLength, additionalProperties: false } }),
+      userOps
+    );
+
+    await expect(id).toBeTruthy();
   });
 });

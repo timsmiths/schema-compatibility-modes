@@ -5,6 +5,7 @@ import {
   BookingV1Value_BaseWithDeleteEnumValue,
   BookingV1Value_BaseWithDeleteOptional,
   BookingV1Value_BaseWithDeleteRequired,
+  BookingV1Value_BaseWithModifiedMaxLength,
   BookingV1Value_BaseWithModifiedType,
   BookingV1Value_BaseWithNewEnumValue,
   BookingV1Value_BaseWithNewOptional,
@@ -230,5 +231,20 @@ describe('FullTransitive Compatible Schemas Evolution', () => {
       );
 
     await expect(throwable).rejects.toThrowError('Difference{jsonPath=\'#/properties/bookingId\', type=TYPE_CHANGED}]');
+  });
+
+  it('will DENY changing validation in CLOSED schema mode', async () => {
+    await registry.register(
+      makeSchema({ BookingV1Value: { ...BookingV1ValueBase, additionalProperties: false } }),
+      userOps
+    );
+
+    const throwable = async () =>
+      registry.register(
+        makeSchema({ BookingV1Value: { ...BookingV1Value_BaseWithModifiedMaxLength, additionalProperties: false } }),
+        userOps
+      );
+
+    await expect(throwable).rejects.toThrowError('Difference{jsonPath=\'#/properties/vehicleId/maxLength\', type=MAX_LENGTH_ADDED}]');
   });
 });
