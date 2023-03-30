@@ -1,7 +1,5 @@
-import axios from 'axios';
-import timers from 'timers/promises'
-import { COMPATIBILITY, SchemaType } from "@kafkajs/confluent-schema-registry";
-import { SchemaRegistry } from '@kafkajs/confluent-schema-registry';
+import { COMPATIBILITY } from "@kafkajs/confluent-schema-registry";
+import registry, { resetSchemaRegistry, SchemaOpts } from './schemaRegistry';
 import {
   BookingV1ValueBase,
   BookingV1Value_BaseWithDeleteEnumValue,
@@ -13,29 +11,14 @@ import {
   makeSchema,
 } from './_fixtures';
 
-const registry = new SchemaRegistry({ host: 'http://0.0.0.0:8081' }, {
-  [SchemaType.JSON]: {
-    // ajvInstance: ajv,
-    // unknownFormats: 'ignore',
-    strict: false,
-    removeAdditional: true
-  },
-});
-
-const userOps = {
+const userOps: SchemaOpts = {
   subject: 'com.tim.test.backward.transitive',
   compatibility: COMPATIBILITY.BACKWARD_TRANSITIVE,
 }
 
 describe('BackwardTransitive Compatible Schemas Evolution', () => {
 
-  beforeEach(async () => {
-    try {
-      await axios.delete("http://localhost:8081/subjects/com.tim.test.backward.transitive");
-      await axios.delete("http://localhost:8081/subjects/com.tim.test.backward.transitive?permanent=true");
-      await timers.setTimeout(2000);
-    } catch { }
-  })
+  beforeEach(() => resetSchemaRegistry(userOps.subject));
 
   it('will ALLOW new optional fields in CLOSED schema mode', async () => {
     await registry.register(
