@@ -297,6 +297,46 @@ export const BookingV1Value_BaseWithDeleteEnumValue: JSONSchema7 = {
   "type": "object"
 }
 
+export const BookingV1Value_BaseWithModifiedType: JSONSchema7 = {
+  "additionalProperties": true,
+  "properties": {
+    "bookingId": {
+      "minimum": 0,
+      "title": "bookingId",
+      "type": "string"
+    },
+    "vehicleId": {
+      "title": "vehicleId",
+      "type": "string"
+    },
+    "segment": {
+      "enum": [
+        "UK",
+      ],
+      "title": "segment",
+      "type": "string"
+    },
+    "phone": {
+      "title": "phone",
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+    }
+  },
+  "required": [
+    "bookingId",
+    "vehicleId",
+    "segment",
+  ],
+  "type": "object"
+}
+
 export const makeSchema = (definitions): any => ({
   type: SchemaType.JSON,
   schema: JSON.stringify({ ...initialSchema, definitions }),

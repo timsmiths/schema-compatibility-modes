@@ -5,6 +5,7 @@ import {
   BookingV1Value_BaseWithDeleteEnumValue,
   BookingV1Value_BaseWithDeleteOptional,
   BookingV1Value_BaseWithDeleteRequired,
+  BookingV1Value_BaseWithModifiedType,
   BookingV1Value_BaseWithNewEnumValue,
   BookingV1Value_BaseWithNewOptional,
   BookingV1Value_BaseWithNewRequired,
@@ -193,5 +194,35 @@ describe('BackwardTransitive Compatible Schemas Evolution', () => {
       );
 
     await expect(throwable).rejects.toThrowError('Difference{jsonPath=\'#/properties/segment\', type=COMBINED_TYPE_SUBSCHEMAS_CHANGED}]');
+  });
+
+  it('will DENY changing type from Number to String in OPEN schema mode', async () => {
+    await registry.register(
+      makeSchema({ BookingV1Value: { ...BookingV1ValueBase } }),
+      userOps
+    );
+
+    const throwable = async () =>
+      registry.register(
+        makeSchema({ BookingV1Value: BookingV1Value_BaseWithModifiedType }),
+        userOps
+      );
+
+    await expect(throwable).rejects.toThrowError('Difference{jsonPath=\'#/properties/bookingId\', type=TYPE_CHANGED}]');
+  });
+
+  it('will DENY changing type from Number to String in CLOSED schema mode', async () => {
+    await registry.register(
+      makeSchema({ BookingV1Value: { ...BookingV1ValueBase, additionalProperties: false } }),
+      userOps
+    );
+
+    const throwable = async () =>
+      registry.register(
+        makeSchema({ BookingV1Value: { ...BookingV1Value_BaseWithModifiedType, additionalProperties: false } }),
+        userOps
+      );
+
+    await expect(throwable).rejects.toThrowError('Difference{jsonPath=\'#/properties/bookingId\', type=TYPE_CHANGED}]');
   });
 });
